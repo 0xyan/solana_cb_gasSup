@@ -7,32 +7,18 @@ import json
 load_dotenv(override=True)
 
 API_KEY = os.getenv("HELIUS_API_KEY")
-WEBHOOK_URL = "https://736b-171-97-216-9.ngrok-free.app"
-GAS_SUPPLIER_CONTRACT = "59L2oxymiQQ9Hvhh92nt8Y7nDYjsauFkdb3SybdnsG6"
+WEBHOOK_URL = "http://113.30.188.29:8000"
+GAS_SUPPLIER_CONTRACT = (
+    "59L2oxymiQQ9Hvhh92nt8Y7nDYjsauFkdb3SybdnsG6e"  # Add your contract address
+)
 
 
 def get_existing_webhooks():
     url = f"https://api.helius.xyz/v0/webhooks?api-key={API_KEY}"
     response = requests.get(url)
-
-    if response.status_code != 200:
-        print(
-            f"\nWarning: Could not fetch existing webhooks (Status: {response.status_code})"
-        )
-        return []  # Return empty list if we can't get webhooks
-
-    try:
-        webhooks = response.json()
-        if isinstance(webhooks, list):
-            print(f"\nFound {len(webhooks)} existing webhooks")
-            return webhooks
-        else:
-            print("\nWarning: Unexpected response format from Helius API")
-            return []
-
-    except Exception as e:
-        print(f"Error processing webhooks: {str(e)}")
-        return []
+    webhooks = response.json()
+    print(f"\nFound {len(webhooks)} existing webhooks")
+    return webhooks
 
 
 def delete_webhook(webhook_id):
@@ -42,18 +28,18 @@ def delete_webhook(webhook_id):
 
 
 def register_webhook():
-    # Try to get existing webhooks, but continue even if it fails
+    # Get existing webhooks
     existing = get_existing_webhooks()
 
-    if existing:  # Only try to delete if we successfully got existing webhooks
-        for webhook in existing:
-            if isinstance(webhook, dict) and webhook.get("webhookURL") == WEBHOOK_URL:
-                print(
-                    f"Deleting webhook {webhook['webhookID']} matching URL: {WEBHOOK_URL}"
-                )
-                delete_webhook(webhook["webhookID"])
+    # Only delete webhooks that match our WEBHOOK_URL
+    for webhook in existing:
+        if webhook.get("webhookURL") == WEBHOOK_URL:
+            print(
+                f"Deleting webhook {webhook['webhookID']} matching URL: {WEBHOOK_URL}"
+            )
+            delete_webhook(webhook["webhookID"])
 
-    # Create new webhook
+    # Create webhook for gas supplier contract
     url = f"https://api.helius.xyz/v0/webhooks?api-key={API_KEY}"
     payload = {
         "webhookURL": WEBHOOK_URL,
