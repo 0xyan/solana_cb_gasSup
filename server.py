@@ -130,8 +130,8 @@ async def process_event(event):
                 logger.warning(transfer_info)
 
                 message = (
-                    f"🔍 <b>Tracked Token Found by Gas Supplier!</b>\n\n"
-                    f"Token: <b>{token_name}</b>\n"
+                    f"🔍 <b>Coinbase Gas Supplier transfer</b>\n\n"
+                    f"Token detected: <b>{token_name}</b>\n"
                     f"Wallet: <code>{to_address}</code>\n"
                     f"<a href='https://solscan.io/tx/{tx_signature}'>View Transaction</a>"
                 )
