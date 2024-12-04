@@ -42,33 +42,30 @@ def send_telegram_message(message):
 
 
 async def check_wallet_tokens(wallet_address):
-    """Check if wallet holds any tokens from our tracking list"""
     try:
         helius_url = (
             f"https://mainnet.helius-rpc.com/?api-key={os.getenv('HELIUS_API_KEY')}"
         )
 
-        payload = {
+        token_payload = {
             "jsonrpc": "2.0",
-            "id": "my-id",
-            "method": "getAssetsByOwner",
-            "params": {"ownerAddress": wallet_address, "page": 1, "limit": 1000},
+            "id": "test",
+            "method": "getTokenAccounts",
+            "params": {"owner": wallet_address, "limit": 1000},
         }
 
-        response = requests.post(
-            helius_url, headers={"Content-Type": "application/json"}, json=payload
+        token_response = requests.post(
+            helius_url, headers={"Content-Type": "application/json"}, json=token_payload
         )
+        token_data = token_response.json()
 
-        data = response.json()
+        if "result" in token_data and "token_accounts" in token_data["result"]:
+            for token_account in token_data["result"]["token_accounts"]:
+                mint = token_account["mint"]
+                amount = int(token_account["amount"])
 
-        if "result" in data:
-            assets = data["result"]["items"]
-            for asset in assets:
-                if asset["id"] in TRACKED_TOKENS:
-                    return (
-                        True,
-                        TRACKED_TOKENS[asset["id"]],
-                    )  # Return tuple (True, token_name)
+                if amount > 0 and mint in TRACKED_TOKENS:
+                    return True, TRACKED_TOKENS[mint]
 
         return False, None
 
@@ -112,8 +109,6 @@ async def process_event(event):
                 continue
 
             to_address = transfer.get("toUserAccount")
-
-            # Now we get both the boolean and token name
             has_tracked_tokens, token_name = await check_wallet_tokens(to_address)
 
             if has_tracked_tokens:
