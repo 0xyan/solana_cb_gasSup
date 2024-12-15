@@ -143,7 +143,7 @@ async def health_check():
 
 
 if __name__ == "__main__":
-    print("Server starting on port 8000...")
+    print("Server starting on port 8004...")
     print(f"Monitoring outgoing transfers from gas supplier: {contract}")
     print(f"Tracking tokens: {list(TRACKED_TOKENS.values())}")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8004)
