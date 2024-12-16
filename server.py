@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 import logging
 from datetime import datetime
 import uvicorn
-from acc_list import TRACKED_TOKENS
+from acc_list import TRACKED_TOKENS, WALLETS_TO_IGNORE
 from dotenv import load_dotenv
 import requests
 import os
@@ -109,6 +109,11 @@ async def process_event(event):
                 continue
 
             to_address = transfer.get("toUserAccount")
+
+            # Skip if wallet is in ignore list
+            if to_address in WALLETS_TO_IGNORE:
+                continue
+
             has_tracked_tokens, token_name = await check_wallet_tokens(to_address)
 
             if has_tracked_tokens:
